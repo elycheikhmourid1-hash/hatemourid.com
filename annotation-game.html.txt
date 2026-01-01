@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة التعليق التوضيحي - إلي الشيخ موريد</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* تأثيرات الخلفية */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+        
+        /* الهيدر */
+        .game-header {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #00ff9d;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 157, 0.1), transparent);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .game-title {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 255, 157, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .game-subtitle {
+            font-size: 1.2rem;
+            color: #aaa;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* لوحة المعلومات */
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.5);
+            margin: 2rem auto;
+            width: 90%;
+            max-width: 1200px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            box-shadow: 0 0 40px rgba(0, 255, 157, 0.2);
+            animation: glow 3s infinite alternate;
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 30px rgba(0, 255, 157, 0.2); }
+            100% { box-shadow: 0 0 60px rgba(0, 255, 157, 0.4); }
+        }
+        
+        .info-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            min-width: 200px;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-10px);
+            border-color: #00ff9d;
+            background: rgba(0, 255, 157, 0.05);
+        }
+        
+        .info-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .info-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+            color: #00ff9d;
+            text-shadow: 0 0 15px #00ff9d;
+        }
+        
+        .info-label {
+            color: #aaa;
+            font-size: 1.1rem;
+        }
+        
+        /* منطقة اللعبة */
+        .game-area {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 500px;
+            margin: 2rem auto;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid #00ff9d;
+            box-shadow: 0 0 50px rgba(0, 255, 157, 0.3);
+            background: #000;
+            cursor: crosshair;
+        }
+        
+        .game-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: filter 0.3s;
+        }
+        
+        .annotation-box {
+            position: absolute;
+            border: 3px dashed #ff0055;
+            background: rgba(255, 0, 85, 0.1);
+            cursor: move;
+            transition: all 0.2s;
+        }
+        
+        .annotation-box:hover {
+            border-style: solid;
+            background: rgba(255, 0, 85, 0.2);
+        }
+        
+        .box-label {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            background: #ff0055;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        /* الأهداف */
+        .targets-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .target-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .target-item.active {
+            border-color: #00ff9d;
+            background: rgba(0, 255, 157, 0.1);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+        }
+        
+        .target-icon {
+            font-size: 2.5rem;
+        }
+        
+        .target-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .target-count {
+            color: #00ff9d;
+            font-weight: bold;
+        }
+        
+        /* الأزرار */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .game-btn {
+            padding: 1.2rem 3rem;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .game-btn:hover::before {
+            left: 100%;
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #00ff9d, #00b8ff);
+            color: #000;
+        }
+        
+        .start-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.5);
+        }
+        
+        .reset-btn {
+            background: rgba(255, 0, 85, 0.8);
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background: rgba(255, 0, 85, 1);
+            transform: scale(1.05);
+        }
+        
+        /* نتائج اللعبة */
+        .results-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .results-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 3rem;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            border: 3px solid #00ff9d;
+            box-shadow: 0 0 60px rgba(0, 255, 157, 0.4);
+            animation: popIn 0.5s;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .result-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #00ff9d;
+        }
+        
+        .result-score {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            background: linear-gradient(45deg, #00ff9d, #ff0055);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .ai-comparison {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+        }
+        
+        .comparison-bar {
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin: 1rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .player-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff9d, #00b8ff);
+            border-radius: 15px;
+            transition: width 2s;
+            width: 0%;
+        }
+        
+        .ai-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0055, #ff8a00);
+            border-radius: 15px;
+            transition: width 2s;
+            width: 0%;
+        }
+        
+        /* تلميحات */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            z-index: 100;
+            display: none;
+            border: 1px solid #00ff9d;
+            max-width: 300px;
+        }
+        
+        /* التجاوب */
+        @media (max-width: 768px) {
+            .game-title { font-size: 2.5rem; }
+            .game-info { flex-direction: column; align-items: center; gap: 1rem; }
+            .info-card { width: 90%; }
+            .game-area { height: 400px; }
+            .targets-container { gap: 1rem; }
+            .target-item { flex: 1; min-width: 150px; justify-content: center; }
+            .controls { flex-direction: column; align-items: center; }
+            .game-btn { width: 90%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- تأثيرات الجسيمات -->
+    <div class="bg-particles" id="particles"></div>
+    
+    <!-- الهيدر -->
+    <header class="game-header">
+        <h1 class="game-title">🎮 تحدي التعليق التوضيحي</h1>
+        <p class="game-subtitle">هل يمكنك وضع العلامات على البيانات أسرع وأدق من الذكاء الاصطناعي؟</p>
+        <p style="color: #00ff9d; margin-top: 0.5rem;">طور بواسطة: إلي الشيخ موريد - خبير بيانات الذكاء الاصطناعي</p>
+    </header>
+    
+    <!-- لوحة المعلومات -->
+    <div class="game-info">
+        <div class="info-card">
+            <span class="info-icon">⏱️</span>
+            <div class="info-value" id="timer">60</div>
+            <div class="info-label">ثانية متبقية</div>
+        </div>
+        <div class="info-card">
+            <span class="info-icon">🏆</span>
+            <div class="info-value" id="score">0</div>
+            <div class="info-label">النقاط</div>
+        </div>
+        <div class="info-card">
+            <span class="info-icon">🎯</span>
+            <div class="info-value" id="accuracy">0%</div>
+            <div class="info-label">الدقة</div>
+        </div>
+        <div class="info-card">
+            <span class="info-icon">⚡</span>
+            <div class="info-value" id="combo">1x</div>
+            <div class="info-label">مضاعف السرعة</div>
+        </div>
+    </div>
+    
+    <!-- منطقة اللعبة -->
+    <div class="game-area" id="gameArea">
+        <img class="game-image" id="gameImage" src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="مشهد شارع">
+        
+        <!-- العلامات ستضاف هنا ديناميكياً -->
+    </div>
+    
+    <!-- قائمة الأهداف -->
+    <div class="targets-container" id="targetsList">
+        <div class="target-item" data-target="car">
+            <span class="target-icon">🚗</span>
+            <div>
+                <div class="target-name">سيارة</div>
+                <div class="target-count">0/5</div>
+            </div>
+        </div>
+        <div class="target-item" data-target="person">
+            <span class="target-icon">👤</span>
+            <div>
+                <div class="target-name">شخص</div>
+                <div class="target-count">0/3</div>
+            </div>
+        </div>
+        <div class="target-item" data-target="traffic-light">
+            <span class="target-icon">🚦</span>
+            <div>
+                <div class="target-name">إشارة مرور</div>
+                <div class="target-count">0/2</div>
+            </div>
+        </div>
+        <div class="target-item" data-target="dog">
+            <span class="target-icon">🐕</span>
+            <div>
+                <div class="target-name">كلب</div>
+                <div class="target-count">0/2</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- أزرار التحكم -->
+    <div class="controls">
+        <button class="game-btn start-btn" id="startBtn">
+            <i class="fas fa-play"></i> ابدأ التحدي!
+        </button>
+        <button class="game-btn reset-btn" id="resetBtn">
+            <i class="fas fa-redo"></i> إعادة تشغيل
+        </button>
+    </div>
+    
+    <!-- نتائج اللعبة -->
+    <div class="results-modal" id="resultsModal">
+        <div class="results-content">
+            <h2 class="result-title" id="resultTitle">🎉 انتهت اللعبة!</h2>
+            <div class="result-score" id="finalScore">0</div>
+            
+            <div class="ai-comparison">
+                <h3>🏆 مقارنة مع الذكاء الاصطناعي</h3>
+                <div style="display: flex; justify-content: space-between; margin: 1rem 0;">
+                    <div>
+                        <div style="color: #00ff9d; font-weight: bold;">أنت</div>
+                        <div id="playerScore">0 نقطة</div>
+                    </div>
+                    <div>
+                        <div style="color: #ff0055; font-weight: bold;">الذكاء الاصطناعي</div>
+                        <div id="aiScore">0 نقطة</div>
+                    </div>
+                </div>
+                
+                <div style="margin: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #00ff9d;">⬤ أدائك</span>
+                        <span style="color: #ff0055;">⬤ الذكاء الاصطناعي</span>
+                    </div>
+                    <div class="comparison-bar">
+                        <div class="player-bar" id="playerBar"></div>
+                    </div>
+                    <div class="comparison-bar">
+                        <div class="ai-bar" id="aiBar"></div>
+                    </div>
+                </div>
+                
+                <div id="comparisonText" style="margin: 1rem 0; font-size: 1.2rem;"></div>
+            </div>
+            
+            <div style="margin: 2rem 0;">
+                <h3>📊 إحصائياتك</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                    <div style="background: rgba(0,255,157,0.1); padding: 1rem; border-radius: 10px;">
+                        <div style="font-size: 0.9rem; color: #aaa;">التعليقات الصحيحة</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #00ff9d;" id="correctAnnotations">0</div>
+                    </div>
+                    <div style="background: rgba(255,0,85,0.1); padding: 1rem; border-radius: 10px;">
+                        <div style="font-size: 0.9rem; color: #aaa;">التعليقات الخاطئة</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #ff0055;" id="wrongAnnotations">0</div>
+                    </div>
+                    <div style="background: rgba(0,184,255,0.1); padding: 1rem; border-radius: 10px;">
+                        <div style="font-size: 0.9rem; color: #aaa;">السرعة</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #00b8ff;" id="speedScore">0 ثانية</div>
+                    </div>
+                    <div style="background: rgba(255,138,0,0.1); padding: 1rem; border-radius: 10px;">
+                        <div style="font-size: 0.9rem; color: #aaa;">الدقة النهائية</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #ff8a00;" id="finalAccuracy">0%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="game-btn start-btn" onclick="restartGame()" style="margin-top: 1rem;">
+                <i class="fas fa-redo"></i> حاول مرة أخرى
+            </button>
+        </div>
+    </div>
+    
+    <!-- تلميحات -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // بيانات اللعبة
+        const gameData = {
+            score: 0,
+            timeLeft: 60,
+            accuracy: 0,
+            combo: 1,
+            correct: 0,
+            wrong: 0,
+            gameActive: false,
+            currentTarget: 'car',
+            targets: {
+                car: { name: 'سيارة', icon: '🚗', needed: 5, found: 0 },
+                person: { name: 'شخص', icon: '👤', needed: 3, found: 0 },
+                'traffic-light': { name: 'إشارة مرور', icon: '🚦', needed: 2, found: 0 },
+                dog: { name: 'كلب', icon: '🐕', needed: 2, found: 0 }
+            },
+            images: [
+                'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                'https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+            ],
+            annotations: [],
+            currentImageIndex: 0
+        };
+
+        // DOM عناصر
+        const elements = {
+            timer: document.getElementById('timer'),
+            score: document.getElementById('score'),
+            accuracy: document.getElementById('accuracy'),
+            combo: document.getElementById('combo'),
+            gameArea: document.getElementById('gameArea'),
+            gameImage: document.getElementById('gameImage'),
+            startBtn: document.getElementById('startBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            targetsList: document.getElementById('targetsList'),
+            resultsModal: document.getElementById('resultsModal'),
+            finalScore: document.getElementById('finalScore'),
+            playerScore: document.getElementById('playerScore'),
+            aiScore: document.getElementById('aiScore'),
+            playerBar: document.getElementById('playerBar'),
+            aiBar: document.getElementById('aiBar'),
+            comparisonText: document.getElementById('comparisonText'),
+            correctAnnotations: document.getElementById('correctAnnotations'),
+            wrongAnnotations: document.getElementById('wrongAnnotations'),
+            speedScore: document.getElementById('speedScore'),
+            finalAccuracy: document.getElementById('finalAccuracy'),
+            tooltip: document.getElementById('tooltip'),
+            resultTitle: document.getElementById('resultTitle')
+        };
+
+        // تهيئة الجسيمات
+        function initParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = `${Math.random() * 10 + 5}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                container.appendChild(particle);
+            }
+        }
+
+        // بدء اللعبة
+        function startGame() {
+            resetGame();
+            gameData.gameActive = true;
+            elements.startBtn.disabled = true;
+            elements.startBtn.innerHTML = '<i class="fas fa-running"></i> جاري اللعب...';
+            elements.startBtn.style.opacity = '0.7';
+            
+            // تشغيل المؤقت
+            gameData.timerInterval = setInterval(() => {
+                gameData.timeLeft--;
+                elements.timer.textContent = gameData.timeLeft;
+                
+                if (gameData.timeLeft <= 0) {
+                    endGame();
+                }
+                
+                // زيادة المضاعف مع الوقت
+                if (gameData.timeLeft < 30 && gameData.timeLeft > 15) {
+                    gameData.combo = 1.5;
+                } else if (gameData.timeLeft <= 15) {
+                    gameData.combo = 2;
+                }
+                elements.combo.textContent = `${gameData.combo}x`;
+                
+                // تغيير الصورة كل 15 ثانية
+                if (gameData.timeLeft % 15 === 0) {
+                    changeImage();
+                }
+            }, 1000);
+            
+            // إظهار أول هدف
+            selectRandomTarget();
+            
+            // إضافة مربعات تعليق عشوائية (أهداف للاعب)
+            createRandomAnnotations();
+        }
+
+        // إعادة تعيين اللعبة
+        function resetGame() {
+            clearInterval(gameData.timerInterval);
+            gameData.score = 0;
+            gameData.timeLeft = 60;
+            gameData.accuracy = 0;
+            gameData.correct = 0;
+            gameData.wrong = 0;
+            gameData.combo = 1;
+            
+            // إعادة تعيين الأهداف
+            for (let target in gameData.targets) {
+                gameData.targets[target].found = 0;
+            }
+            
+            // تحديث العرض
+            updateDisplay();
+            clearGameArea();
+            updateTargetsDisplay();
+            
+            elements.startBtn.disabled = false;
+            elements.startBtn.innerHTML = '<i class="fas fa-play"></i> ابدأ التحدي!';
+            elements.startBtn.style.opacity = '1';
+            gameData.gameActive = false;
+        }
+
+        // تحديث العرض
+        function updateDisplay() {
+            elements.score.textContent = gameData.score;
+            elements.timer.textContent = gameData.timeLeft;
+            elements.combo.textContent = `${gameData.combo}x`;
+            
+            if (gameData.correct + gameData.wrong > 0) {
+                gameData.accuracy = Math.round((gameData.correct / (gameData.correct + gameData.wrong)) * 100);
+            }
+            elements.accuracy.textContent = `${gameData.accuracy}%`;
+        }
+
+        // مسح منطقة اللعبة
+        function clearGameArea() {
+            elements.gameArea.querySelectorAll('.annotation-box').forEach(box => box.remove());
+            gameData.annotations = [];
+        }
+
+        // تحديث عرض الأهداف
+        function updateTargetsDisplay() {
+            elements.targetsList.querySelectorAll('.target-item').forEach(item => {
+                const target = item.dataset.target;
+                const targetData = gameData.targets[target];
+                const countElement = item.querySelector('.target-count');
+                countElement.textContent = `${targetData.found}/${targetData.needed}`;
+                
+                // تحديث النشاط
+                if (target === gameData.currentTarget) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+                
+                // إذا اكتمل الهدف
+                if (targetData.found >= targetData.needed) {
+                    item.style.opacity = '0.5';
+                    item.style.borderColor = '#00ff9d';
+                }
+            });
+        }
+
+        // اختيار هدف عشوائي
+        function selectRandomTarget() {
+            const availableTargets = Object.keys(gameData.targets).filter(
+                target => gameData.targets[target].found < gameData.targets[target].needed
+            );
+            
+            if (availableTargets.length > 0) {
+                gameData.currentTarget = availableTargets[Math.floor(Math.random() * availableTargets.length)];
+                updateTargetsDisplay();
+                showTooltip(`ابحث عن ${gameData.targets[gameData.currentTarget].name} ${gameData.targets[gameData.currentTarget].icon}`);
+            }
+        }
+
+        // إنشاء تعليقات عشوائية
+        function createRandomAnnotations() {
+            const areaRect = elements.gameArea.getBoundingClientRect();
+            const targets = Object.keys(gameData.targets);
+            
+            targets.forEach(target => {
+                const targetData = gameData.targets[target];
+                const boxesToCreate = targetData.needed;
+                
+                for (let i = 0; i < boxesToCreate; i++) {
+                    setTimeout(() => {
+                        if (!gameData.gameActive) return;
+                        
+                        const size = 60 + Math.random() * 80;
+                        const x = Math.random() * (areaRect.width - size);
+                        const y = Math.random() * (areaRect.height - size);
+                        
+                        createAnnotationBox(x, y, size, size, target, true);
+                    }, i * 500);
+                }
+            });
+        }
+
+        // إنشاء مربع تعليق
+        function createAnnotationBox(x, y, width, height, target, isCorrect) {
+            const box = document.createElement('div');
+            box.className = 'annotation-box';
+            box.style.left = `${x}px`;
+            box.style.top = `${y}px`;
+            box.style.width = `${width}px`;
+            box.style.height = `${height}px`;
+            box.dataset.target = target;
+            box.dataset.correct = isCorrect;
+            
+            const label = document.createElement('div');
+            label.className = 'box-label';
+            label.textContent = gameData.targets[target].icon;
+            box.appendChild(label);
+            
+            // إضافة حدث النقر
+            box.addEventListener('click', () => handleBoxClick(box));
+            
+            elements.gameArea.appendChild(box);
+            gameData.annotations.push(box);
+            
+            // حركة عشوائية للمربعات
+            if (Math.random() > 0.7) {
+                animateBox(box);
+            }
+        }
+
+        // التعامل مع نقر المربع
+        function handleBoxClick(box) {
+            if (!gameData.gameActive) return;
+            
+            const target = box.dataset.target;
+            const isCorrect = box.dataset.correct === 'true';
+            const targetData = gameData.targets[target];
+            
+            // تحقق إذا كان هذا هو الهدف الحالي
+            const isCurrentTarget = target === gameData.currentTarget;
+            
+            if (isCorrect && isCurrentTarget && targetData.found < targetData.needed) {
+                // إجابة صحيحة
+                gameData.correct++;
+                gameData.score += Math.floor(100 * gameData.combo);
+                targetData.found++;
+                
+                // تأثير مرئي للمربع الصحيح
+                box.style.border = '3px solid #00ff9d';
+                box.style.background = 'rgba(0, 255, 157, 0.3)';
+                box.style.transform = 'scale(1.2)';
+                
+                // إظهار تأثير النقاط
+                showPointsEffect(box, `+${Math.floor(100 * gameData.combo)}`);
+                
+                // تحديث الأهداف
+                updateTargetsDisplay();
+                
+                // إذا اكتمل الهدف، اختر هدفًا جديدًا
+                if (targetData.found >= targetData.needed) {
+                    showTooltip(`🎉 أكملت ${targetData.name}!`, 'success');
+                    setTimeout(() => selectRandomTarget(), 1000);
+                }
+            } else {
+                // إجابة خاطئة
+                gameData.wrong++;
+                gameData.score = Math.max(0, gameData.score - 50);
+                gameData.combo = 1;
+                
+                // تأثير مرئي للمربع الخاطئ
+                box.style.border = '3px solid #ff0055';
+                box.style.background = 'rgba(255, 0, 85, 0.3)';
+                box.style.transform = 'scale(0.8)';
+                
+                showPointsEffect(box, `-50`);
+                showTooltip('❌ هذا ليس الهدف الصحيح!', 'error');
+            }
+            
+            // إزالة المربع بعد ثانية
+            setTimeout(() => {
+                box.style.transition = 'all 0.5s';
+                box.style.opacity = '0';
+                box.style.transform = 'scale(0)';
+                setTimeout(() => box.remove(), 500);
+            }, 1000);
+            
+            updateDisplay();
+        }
+
+        // عرض تأثير النقاط
+        function showPointsEffect(element, points) {
+            const effect = document.createElement('div');
+            effect.textContent = points;
+            effect.style.position = 'absolute';
+            effect.style.left = `${element.offsetLeft + element.offsetWidth / 2}px`;
+            effect.style.top = `${element.offsetTop}px`;
+            effect.style.color = points.startsWith('+') ? '#00ff9d' : '#ff0055';
+            effect.style.fontWeight = 'bold';
+            effect.style.fontSize = '1.5rem';
+            effect.style.zIndex = '1000';
+            effect.style.textShadow = '0 0 10px currentColor';
+            effect.style.animation = 'floatUp 1s forwards';
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes floatUp {
+                    0% { transform: translate(-50%, 0); opacity: 1; }
+                    100% { transform: translate(-50%, -50px); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            elements.gameArea.appendChild(effect);
+            setTimeout(() => effect.remove(), 1000);
+        }
+
+        // عرض التلميح
+        function showTooltip(message, type = 'info') {
+            elements.tooltip.textContent = message;
+            elements.tooltip.style.display = 'block';
+            elements.tooltip.style.background = type === 'success' 
+                ? 'rgba(0, 255, 157, 0.9)' 
+                : type === 'error' 
+                ? 'rgba(255, 0, 85, 0.9)' 
+                : 'rgba(0, 0, 0, 0.9)';
+            
+            elements.tooltip.style.left = '50%';
+            elements.tooltip.style.top = '20px';
+            elements.tooltip.style.transform = 'translateX(-50%)';
+            
+            setTimeout(() => {
+                elements.tooltip.style.display = 'none';
+            }, 2000);
+        }
+
+        // حركة المربعات
+        function animateBox(box) {
+            if (!gameData.gameActive) return;
+            
+            const x = parseInt(box.style.left) || 0;
+            const y = parseInt(box.style.top) || 0;
+            const areaRect = elements.gameArea.getBoundingClientRect();
+            
+            const newX = Math.max(0, Math.min(areaRect.width - box.offsetWidth, x + (Math.random() - 0.5) * 50));
+            const newY = Math.max(0, Math.min(areaRect.height - box.offsetHeight, y + (Math.random() - 0.5) * 50));
+            
+            box.style.transition = 'all 2s ease-in-out';
+            box.style.left = `${newX}px`;
+            box.style.top = `${newY}px`;
+            
+            setTimeout(() => animateBox(box), 2000 + Math.random() * 3000);
+        }
+
+        // تغيير الصورة
+        function changeImage() {
+            if (!gameData.gameActive) return;
+            
+            gameData.currentImageIndex = (gameData.currentImageIndex + 1) % gameData.images.length;
+            elements.gameImage.style.opacity = '0';
+            
+            setTimeout(() => {
+                elements.gameImage.src = gameData.images[gameData.currentImageIndex];
+                elements.gameImage.style.opacity = '1';
+                
+                // إعادة إنشاء التعليقات للصورة الجديدة
+                clearGameArea();
+                setTimeout(() => createRandomAnnotations(), 500);
+            }, 500);
+        }
+
+        // إنهاء اللعبة
+        function endGame() {
+            clearInterval(gameData.timerInterval);
+            gameData.gameActive = false;
+            
+            // حساب درجات الذكاء الاصطناعي
+            const aiScore = Math.floor(gameData.score * (0.8 + Math.random() * 0.4));
+            
+            // تحديث النتائج
+            elements.finalScore.textContent = gameData.score;
+            elements.playerScore.textContent = `${gameData.score} نقطة`;
+            elements.aiScore.textContent = `${aiScore} نقطة`;
+            elements.correctAnnotations.textContent = gameData.correct;
+            elements.wrongAnnotations.textContent = gameData.wrong;
+            elements.speedScore.textContent = `${Math.round(60 - gameData.timeLeft)} ثانية`;
+            elements.finalAccuracy.textContent = `${gameData.accuracy}%`;
+            
+            // تحديث الأشرطة
+            setTimeout(() => {
+                const maxScore = Math.max(gameData.score, aiScore) || 1;
+                const playerPercent = (gameData.score / maxScore) * 100;
+                const aiPercent = (aiScore / maxScore) * 100;
+                
+                elements.playerBar.style.width = `${playerPercent}%`;
+                elements.aiBar.style.width = `${aiPercent}%`;
+                
+                // نص المقارنة
+                if (gameData.score > aiScore) {
+                    elements.resultTitle.textContent = '🎉 فزت على الذكاء الاصطناعي!';
+                    elements.resultTitle.style.color = '#00ff9d';
+                    elements.comparisonText.innerHTML = `مبروك! تفوقت على الذكاء الاصطناعي بـ <span style="color:#00ff9d">${gameData.score - aiScore}</span> نقطة!`;
+                } else if (gameData.score < aiScore) {
+                    elements.resultTitle.textContent = '🤖 الذكاء الاصطناعي تفوق عليك';
+                    elements.resultTitle.style.color = '#ff0055';
+                    elements.comparisonText.innerHTML = `حاول مرة أخرى! الذكاء الاصطناعي تفوق عليك بـ <span style="color:#ff0055">${aiScore - gameData.score}</span> نقطة.`;
+                } else {
+                    elements.resultTitle.textContent = '⚖️ تعادل!';
+                    elements.resultTitle.style.color = '#00b8ff';
+                    elements.comparisonText.textContent = 'نتيجة متعادلة مع الذكاء الاصطناعي!';
+                }
+            }, 100);
+            
+            // إظهار النافذة النتائج
+            setTimeout(() => {
+                elements.resultsModal.style.display = 'flex';
+            }, 1500);
+        }
+
+        // إعادة تشغيل اللعبة
+        function restartGame() {
+            elements.resultsModal.style.display = 'none';
+            setTimeout(() => startGame(), 500);
+        }
+
+        // أحداث المستخدم
+        elements.startBtn.addEventListener('click', startGame);
+        elements.resetBtn.addEventListener('click', resetGame);
+
+        // إضافة تفاعل للأهداف
+        elements.targetsList.querySelectorAll('.target-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (!gameData.gameActive) return;
+                
+                const target = this.dataset.target;
+                if (gameData.targets[target].found < gameData.targets[target].needed) {
+                    gameData.currentTarget = target;
+                    updateTargetsDisplay();
+                    showTooltip(`الآن ابحث عن ${gameData.targets[target].name} ${gameData.targets[target].icon}`);
+                }
+            });
+        });
+
+        // تهيئة اللعبة
+        window.addEventListener('DOMContentLoaded', () => {
+            initParticles();
+            updateDisplay();
+            updateTargetsDisplay();
+            
+            // إضافة بعض التعليمات
+            setTimeout(() => {
+                showTooltip('🎮 انقر على "ابدأ التحدي" للبدء!');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
